@@ -1,19 +1,31 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { TextInput, Button, Surface, Text, HelperText } from 'react-native-paper';
-import { useRouter } from 'expo-router';
-import { register as registerUser } from '@/services/api';
-import { saveToken, saveUser } from '@/services/auth';
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
+import {
+  TextInput,
+  Button,
+  Surface,
+  Text,
+  HelperText,
+} from "react-native-paper";
+import { useRouter } from "expo-router";
+import { register as registerUser } from "@/services/api";
+import { saveToken, saveUser } from "@/services/auth";
 
 export default function RegisterScreen() {
-  const [displayName, setDisplayName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [secureConfirmEntry, setSecureConfirmEntry] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const router = useRouter();
 
   // Password validation
@@ -21,15 +33,18 @@ export default function RegisterScreen() {
   const hasUpperCase = /[A-Z]/.test(password);
   const hasLowerCase = /[a-z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
-  const passwordsMatch = password === confirmPassword && confirmPassword.length > 0;
-  const isPasswordValid = hasMinLength && hasUpperCase && hasLowerCase && hasNumber;
-  const canSubmit = displayName.trim() && email.trim() && isPasswordValid && passwordsMatch;
+  const passwordsMatch =
+    password === confirmPassword && confirmPassword.length > 0;
+  const isPasswordValid =
+    hasMinLength && hasUpperCase && hasLowerCase && hasNumber;
+  const canSubmit =
+    displayName.trim() && email.trim() && isPasswordValid && passwordsMatch;
 
   const handleRegister = async () => {
     if (!canSubmit) return;
 
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const response = await registerUser({
@@ -40,14 +55,14 @@ export default function RegisterScreen() {
       });
 
       // Save token and user data
-      await saveToken(response.accessToken);
+      await saveToken(response.accessToken, response.refreshToken);
       await saveUser(response.user);
 
       // Navigate to home
-      router.replace('/home');
+      router.replace("/home");
     } catch (err: any) {
-      console.error('Registration error:', err);
-      setError(err.message || 'Registration failed. Please try again.');
+      console.error("Registration error:", err);
+      setError(err.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -55,7 +70,7 @@ export default function RegisterScreen() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -102,7 +117,7 @@ export default function RegisterScreen() {
               left={<TextInput.Icon icon="lock" />}
               right={
                 <TextInput.Icon
-                  icon={secureTextEntry ? 'eye' : 'eye-off'}
+                  icon={secureTextEntry ? "eye" : "eye-off"}
                   onPress={() => setSecureTextEntry(!secureTextEntry)}
                 />
               }
@@ -113,17 +128,26 @@ export default function RegisterScreen() {
                 <HelperText type="info" visible={true}>
                   Password must contain:
                 </HelperText>
-                <HelperText type={hasMinLength ? 'info' : 'error'} visible={true}>
-                  {hasMinLength ? '✓' : '✗'} At least 8 characters
+                <HelperText
+                  type={hasMinLength ? "info" : "error"}
+                  visible={true}
+                >
+                  {hasMinLength ? "✓" : "✗"} At least 8 characters
                 </HelperText>
-                <HelperText type={hasUpperCase ? 'info' : 'error'} visible={true}>
-                  {hasUpperCase ? '✓' : '✗'} One uppercase letter
+                <HelperText
+                  type={hasUpperCase ? "info" : "error"}
+                  visible={true}
+                >
+                  {hasUpperCase ? "✓" : "✗"} One uppercase letter
                 </HelperText>
-                <HelperText type={hasLowerCase ? 'info' : 'error'} visible={true}>
-                  {hasLowerCase ? '✓' : '✗'} One lowercase letter
+                <HelperText
+                  type={hasLowerCase ? "info" : "error"}
+                  visible={true}
+                >
+                  {hasLowerCase ? "✓" : "✗"} One lowercase letter
                 </HelperText>
-                <HelperText type={hasNumber ? 'info' : 'error'} visible={true}>
-                  {hasNumber ? '✓' : '✗'} One number
+                <HelperText type={hasNumber ? "info" : "error"} visible={true}>
+                  {hasNumber ? "✓" : "✗"} One number
                 </HelperText>
               </View>
             )}
@@ -139,15 +163,20 @@ export default function RegisterScreen() {
               left={<TextInput.Icon icon="lock-check" />}
               right={
                 <TextInput.Icon
-                  icon={secureConfirmEntry ? 'eye' : 'eye-off'}
+                  icon={secureConfirmEntry ? "eye" : "eye-off"}
                   onPress={() => setSecureConfirmEntry(!secureConfirmEntry)}
                 />
               }
             />
 
             {confirmPassword.length > 0 && (
-              <HelperText type={passwordsMatch ? 'info' : 'error'} visible={true}>
-                {passwordsMatch ? '✓ Passwords match' : '✗ Passwords do not match'}
+              <HelperText
+                type={passwordsMatch ? "info" : "error"}
+                visible={true}
+              >
+                {passwordsMatch
+                  ? "✓ Passwords match"
+                  : "✗ Passwords do not match"}
               </HelperText>
             )}
           </View>
@@ -166,7 +195,7 @@ export default function RegisterScreen() {
             disabled={!canSubmit || loading}
             loading={loading}
           >
-            {loading ? 'Creating Account...' : 'Create Account'}
+            {loading ? "Creating Account..." : "Create Account"}
           </Button>
 
           <Button
@@ -188,23 +217,23 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   surface: {
     padding: 30,
-    width: '100%',
+    width: "100%",
     maxWidth: 400,
     borderRadius: 16,
   },
   title: {
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 8,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   subtitle: {
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 32,
     opacity: 0.7,
   },
@@ -227,6 +256,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   backButton: {
-    alignSelf: 'center',
+    alignSelf: "center",
   },
 });

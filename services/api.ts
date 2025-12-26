@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://impostr-backend-production.up.railway.app';
+const API_BASE_URL = "https://impostr-backend-production.up.railway.app";
 
 export interface RegisterRequest {
   email: string;
@@ -9,6 +9,7 @@ export interface RegisterRequest {
 
 export interface RegisterResponse {
   accessToken: string;
+  refreshToken: string;
   user: {
     id: string;
     email: string;
@@ -24,16 +25,18 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string;
+  refreshToken: string;
+}
+
+export interface RefreshResponse {
+  token: string;
+  refreshToken: string;
 }
 
 export class ApiError extends Error {
-  constructor(
-    message: string,
-    public statusCode?: number,
-    public data?: any
-  ) {
+  constructor(message: string, public statusCode?: number, public data?: any) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
   }
 }
 
@@ -55,12 +58,14 @@ async function handleResponse<T>(response: Response): Promise<T> {
   return response.json();
 }
 
-export async function register(data: RegisterRequest): Promise<RegisterResponse> {
+export async function register(
+  data: RegisterRequest
+): Promise<RegisterResponse> {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
@@ -70,16 +75,16 @@ export async function register(data: RegisterRequest): Promise<RegisterResponse>
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError('Network error. Please check your connection.');
+    throw new ApiError("Network error. Please check your connection.");
   }
 }
 
 export async function login(data: LoginRequest): Promise<LoginResponse> {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
@@ -89,7 +94,28 @@ export async function login(data: LoginRequest): Promise<LoginResponse> {
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError('Network error. Please check your connection.');
+    throw new ApiError("Network error. Please check your connection.");
+  }
+}
+
+export async function refreshSession(
+  refreshToken: string
+): Promise<RefreshResponse> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    return handleResponse<RefreshResponse>(response);
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError("Network error. Please check your connection.");
   }
 }
 
@@ -112,7 +138,7 @@ export interface GameSession {
   hostId: string;
   players: Player[];
   config: SessionConfig;
-  state: 'LOBBY' | 'PLAYING' | 'VOTING' | 'ENDED';
+  state: "LOBBY" | "PLAYING" | "VOTING" | "ENDED";
   createdAt: string;
 }
 
@@ -133,9 +159,9 @@ export async function createSession(
 ): Promise<GameSession> {
   try {
     const response = await fetch(`${API_BASE_URL}/game/create`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(data),
@@ -146,7 +172,7 @@ export async function createSession(
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError('Network error. Please check your connection.');
+    throw new ApiError("Network error. Please check your connection.");
   }
 }
 
@@ -156,9 +182,9 @@ export async function joinSession(
 ): Promise<GameSession> {
   try {
     const response = await fetch(`${API_BASE_URL}/game/join`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(data),
@@ -169,7 +195,7 @@ export async function joinSession(
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError('Network error. Please check your connection.');
+    throw new ApiError("Network error. Please check your connection.");
   }
 }
 
@@ -179,7 +205,7 @@ export async function getSession(
 ): Promise<GameSession> {
   try {
     const response = await fetch(`${API_BASE_URL}/game/${roomCode}`, {
-      method: 'GET',
+      method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -190,6 +216,6 @@ export async function getSession(
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError('Network error. Please check your connection.');
+    throw new ApiError("Network error. Please check your connection.");
   }
 }
